@@ -2,6 +2,7 @@
 import scrapy
 from scrapy.http import HtmlResponse
 from jobparser.items import JobparserItem
+from bs4 import BeautifulSoup as bs
 
 
 class HhruSpider(scrapy.Spider):
@@ -21,9 +22,15 @@ class HhruSpider(scrapy.Spider):
             yield response.follow(link, callback=self.vacansy_parse)
 
     def vacansy_parse(self, response: HtmlResponse):
+        html = bs(response.text, 'lxml')
+        link = response.url
         name = response.css('div.vacancy-title h1.header::text').extract_first()
-        salary = response.css('div.vacancy-title p.vacancy-salary::text').extract()
+        #salary = response.css('div.vacancy-title p.vacancy-salary::text').extract()
+        salary = html.find('p', {'class': 'vacancy-salary'}).text
         # print(name, salary)
-        yield JobparserItem(name=name,salary=salary)
+        #print(response.url)
+        #print(salary)
+        #yield JobparserItem(name=name, salary=salary)
+        yield JobparserItem(name=name, salary=salary, link=link, source='hh.ru')
 
 

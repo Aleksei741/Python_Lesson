@@ -28,6 +28,8 @@ class SjruSpider(scrapy.Spider):
         html = bs(response.text, 'lxml')
         name = html.find('h1', {'class': '_3mfro rFbjy s1nFK _2JVkc'}).text
         salary = html.find('span', {'class': '_3mfro _2Wp8I ZON4b PlM3e _2JVkc'}).text
-        print('SupeJop', name, salary)
-        yield JobparserItem(name=name,salary=salary)
+        link = response.url
+        #print('SupeJop', name, salary)
+
+        yield JobparserItem(name=name, salary=salary, link=link, source='superjob.ru')
 
