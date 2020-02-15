@@ -3,7 +3,8 @@ import scrapy
 from scrapy.http import HtmlResponse
 from jobparser.items import JobparserItem
 from bs4 import BeautifulSoup as bs
-
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import Join
 
 class HhruSpider(scrapy.Spider):
     name = 'hhru'
@@ -22,15 +23,16 @@ class HhruSpider(scrapy.Spider):
             yield response.follow(link, callback=self.vacansy_parse)
 
     def vacansy_parse(self, response: HtmlResponse):
-        html = bs(response.text, 'lxml')
-        link = response.url
-        name = response.css('div.vacancy-title h1.header::text').extract_first()
-        #salary = response.css('div.vacancy-title p.vacancy-salary::text').extract()
-        salary = html.find('p', {'class': 'vacancy-salary'}).text
-        # print(name, salary)
-        #print(response.url)
-        #print(salary)
-        #yield JobparserItem(name=name, salary=salary)
-        yield JobparserItem(name=name, salary=salary, link=link, source='hh.ru')
+        loader = ItemLoader(item=JobparserItem(), response=response)
+        #html = bs(response.text, 'lxml')
+        #link = response.url
+        loader.add_value('link', response.url)
+        #name = response.css('div.vacancy-title h1.header::text').extract_first()
+        loader.add_xpath('name', "//h1[contains(@class, 'header')]/text()")
+        #salary = html.find('p', {'class': 'vacancy-salary'}).text
+        loader.add_xpath('salary', "//p[contains(@class, 'vacancy-salary')]/text()", Join(''))
+        loader.add_value('source', 'hh.ru')
+        #yield JobparserItem(name=name, salary=salary, link=link, source='hh.ru')
+        yield loader.load_item()
 
 

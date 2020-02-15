@@ -25,11 +25,16 @@ class SjruSpider(scrapy.Spider):
             yield response.follow(link, callback=self.vacansy_parse_sj)
 
     def vacansy_parse_sj(self, response: HtmlResponse):
-        html = bs(response.text, 'lxml')
-        name = html.find('h1', {'class': '_3mfro rFbjy s1nFK _2JVkc'}).text
-        salary = html.find('span', {'class': '_3mfro _2Wp8I ZON4b PlM3e _2JVkc'}).text
-        link = response.url
+        #html = bs(response.text, 'lxml')
+        loader = ItemLoader(item=JobparserItem(), response=response)
+        #name = html.find('h1', {'class': '_3mfro rFbjy s1nFK _2JVkc'}).text
+        loader.add_xpath('name', "//h1[contains(@class, '_3mfro rFbjy s1nFK _2JVkc')]/text()")
+        #salary = html.find('span', {'class': '_3mfro _2Wp8I ZON4b PlM3e _2JVkc'}).text
+        loader.add_xpath('salary', "//span[contains(@class, '_3mfro _2Wp8I ZON4b PlM3e _2JVkc')]//text()", Join(''))
+        #link = response.url
+        loader.add_value('link', response.url)
         #print('SupeJop', name, salary)
-
-        yield JobparserItem(name=name, salary=salary, link=link, source='superjob.ru')
+        loader.add_value('source', 'superjob.ru')
+        #yield JobparserItem(name=name, salary=salary, link=link, source='superjob.ru')
+        yield loader.load_item()
 

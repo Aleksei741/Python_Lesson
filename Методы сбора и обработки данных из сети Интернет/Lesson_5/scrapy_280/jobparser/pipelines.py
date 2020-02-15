@@ -16,7 +16,7 @@ class JobparserPipeline(object):
         test = item['salary']
         #print(test)
         #Если ххру
-        item['salary'] = item['salary'].replace('\xa0', ' ')
+        #item['salary'] = item['salary'].replace('\xa0', ' ')
         if spider.name == 'hhru':
             if item['salary'] == 'з/п не указана':
                 finance_min = None
